@@ -1,0 +1,20 @@
+# Binaries
+bin/
+
+# Build
+dist/
+
+# Environment
+.env
+
+# IDE
+.vscode/
+
+# Go
+coverage.out
+
+# Docker
+mongo-data/
+
+# Logs
+*.log
