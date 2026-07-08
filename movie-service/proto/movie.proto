@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package movie;
+
+option go_package = "github.com/luizdavid/movies-challenge/proto/moviepb";
+
+service MovieService {
+  rpc GetMovies(GetMoviesRequest) returns (GetMoviesResponse);
+  rpc GetMovieById(GetMovieByIdRequest) returns (GetMovieByIdResponse);
+  rpc CreateMovie(CreateMovieRequest) returns (CreateMovieResponse);
+  rpc DeleteMovie(DeleteMovieRequest) returns (DeleteMovieResponse);
+}
+
+message Movie {
+  int64 id = 1;
+  string title = 2;
+  string year = 3;
+}
+
+message GetMoviesRequest {}
+
+message GetMoviesResponse {
+  repeated Movie movies = 1;
+}
+
+message GetMovieByIdRequest {
+  int64 id = 1;
+}
+
+message GetMovieByIdResponse {
+  Movie movie = 1;
+}
+
+message CreateMovieRequest {
+  int64 id = 1;
+  string title = 2;
+  string year = 3;
+}
+
+message CreateMovieResponse {
+  Movie movie = 1;
+}
+
+message DeleteMovieRequest {
+  int64 id = 1;
+}
+
+message DeleteMovieResponse {
+  bool deleted = 1;
+}
