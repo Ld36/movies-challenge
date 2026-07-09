@@ -46,6 +46,10 @@ func main() {
 		Database(cfg.MongoDatabase).
 		Collection(cfg.MongoCollection)
 
+	if err := bootstrap.EnsureMovieIndexes(ctx, collection, appLogger); err != nil {
+		appLogger.Fatal("failed to ensure movie indexes", zap.Error(err))
+	}
+
 	if err := bootstrap.SeedMovies(ctx, collection, "movies.json", appLogger); err != nil {
 		appLogger.Fatal("failed to seed movies", zap.Error(err))
 	}
