@@ -1,0 +1,141 @@
+basePath: /
+definitions:
+  http.createMovieRequest:
+    properties:
+      id:
+        type: integer
+      title:
+        type: string
+      year:
+        type: string
+    required:
+    - id
+    - title
+    - year
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API Gateway para o microsserviço de Filmes utilizando HTTP, gRPC, Go
+    e MongoDB.
+  title: API Gateway de Filmes
+  version: "1.0"
+paths:
+  /movies:
+    get:
+      description: Listar filmes com paginação
+      parameters:
+      - description: Número da página
+        in: query
+        name: page
+        type: integer
+      - description: Itens por página
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Listar filmes
+      tags:
+      - movies
+    post:
+      description: Criar um novo filme
+      parameters:
+      - description: Dados do filme
+        in: body
+        name: movie
+        required: true
+        schema:
+          $ref: '#/definitions/http.createMovieRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Criar filme
+      tags:
+      - movies
+  /movies/{id}:
+    delete:
+      description: Excluir um filme pelo ID
+      parameters:
+      - description: ID do filme
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Excluir filme
+      tags:
+      - movies
+    get:
+      description: Obter detalhes de um filme pelo ID
+      parameters:
+      - description: ID do filme
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Obter filme por ID
+      tags:
+      - movies
+swagger: "2.0"
