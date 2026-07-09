@@ -19,7 +19,7 @@ func NewMovieHandler(useCases *usecases.MovieUseCases) *MovieHandler {
 }
 
 func (h *MovieHandler) GetMovies(ctx context.Context, req *moviepb.GetMoviesRequest) (*moviepb.GetMoviesResponse, error) {
-	movies, err := h.useCases.ListMovies.Execute(ctx)
+	movies, err := h.useCases.ListMovies.Execute(ctx, req.Page, req.Limit)
 	if err != nil {
 		return nil, ToStatusError(err)
 	}

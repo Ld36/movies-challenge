@@ -29,7 +29,10 @@ func NewMovieHandler(client *grpcclient.MovieClient) *MovieHandler {
 }
 
 func (h *MovieHandler) GetMovies(c *gin.Context) {
-	response, err := h.client.GetMovies(c.Request.Context())
+	page := parseQueryInt(c, "page", 1)
+	limit := parseQueryInt(c, "limit", 20)
+
+	response, err := h.client.GetMovies(c.Request.Context(), page, limit)
 	if err != nil {
 		handleGRPCError(c, err)
 		return
@@ -37,6 +40,10 @@ func (h *MovieHandler) GetMovies(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"data": response.Movies,
+		"pagination": gin.H{
+			"page":  page,
+			"limit": limit,
+		},
 	})
 }
 
@@ -141,6 +148,20 @@ func handleGRPCError(c *gin.Context, err error) {
 	c.JSON(statusCode, gin.H{
 		"error": message,
 	})
+}
+
+func parseQueryInt(c *gin.Context, key string, fallback int64) int64 {
+	value := c.Query(key)
+	if value == "" {
+		return fallback
+	}
+
+	parsed, err := strconv.ParseInt(value, 10, 64)
+	if err != nil || parsed <= 0 {
+		return fallback
+	}
+
+	return parsed
 }
 
 var _ = errors.New

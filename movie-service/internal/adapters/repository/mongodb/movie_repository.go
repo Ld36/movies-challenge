@@ -9,6 +9,7 @@ import (
 	"github.com/luizdavid/movies-challenge/movie-service/internal/domain"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type MovieRepository struct {
@@ -21,11 +22,18 @@ func NewMovieRepository(collection *mongo.Collection) *MovieRepository {
 	}
 }
 
-func (r *MovieRepository) FindAll(ctx context.Context) ([]domain.Movie, error) {
+func (r *MovieRepository) FindAll(ctx context.Context, page int64, limit int64) ([]domain.Movie, error) {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	cursor, err := r.collection.Find(ctx, bson.M{})
+	skip := (page - 1) * limit
+
+	findOptions := options.Find().
+		SetSkip(skip).
+		SetLimit(limit).
+		SetSort(bson.D{{Key: "id", Value: 1}})
+
+	cursor, err := r.collection.Find(ctx, bson.M{}, findOptions)
 	if err != nil {
 		return nil, err
 	}
