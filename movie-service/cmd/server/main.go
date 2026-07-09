@@ -10,7 +10,7 @@ import (
 	"syscall"
 
 	grpcadapter "github.com/luizdavid/movies-challenge/movie-service/internal/adapters/grpc"
-	mongoadapter "github.com/luizdavid/movies-challenge/movie-service/internal/adapters/mongodb"
+	mongoadapter "github.com/luizdavid/movies-challenge/movie-service/internal/adapters/repository/mongodb"
 	"github.com/luizdavid/movies-challenge/movie-service/internal/application"
 	"github.com/luizdavid/movies-challenge/movie-service/internal/config"
 	"github.com/luizdavid/movies-challenge/movie-service/internal/database"
