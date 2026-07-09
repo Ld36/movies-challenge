@@ -11,6 +11,7 @@ import (
 
 	grpcadapter "github.com/luizdavid/movies-challenge/movie-service/internal/adapters/grpc"
 	mongoadapter "github.com/luizdavid/movies-challenge/movie-service/internal/adapters/repository/mongodb"
+	"github.com/luizdavid/movies-challenge/movie-service/internal/bootstrap"
 	"github.com/luizdavid/movies-challenge/movie-service/internal/config"
 	"github.com/luizdavid/movies-challenge/movie-service/internal/database"
 	"github.com/luizdavid/movies-challenge/movie-service/internal/logger"
@@ -44,6 +45,10 @@ func main() {
 	collection := mongoClient.
 		Database(cfg.MongoDatabase).
 		Collection(cfg.MongoCollection)
+
+	if err := bootstrap.SeedMovies(ctx, collection, "movies.json", appLogger); err != nil {
+		appLogger.Fatal("failed to seed movies", zap.Error(err))
+	}
 
 	movieRepository := mongoadapter.NewMovieRepository(collection)
 	movieUseCases := usecases.NewMovieUseCases(movieRepository)
