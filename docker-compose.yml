@@ -1,0 +1,17 @@
+services:
+  mongo:
+    image: mongo:7
+    container_name: movies-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - movies-network
+
+volumes:
+  mongo-data:
+
+networks:
+  movies-network:
+    driver: bridge
