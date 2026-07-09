@@ -10,6 +10,7 @@ import (
 	httpadapter "github.com/luizdavid/movies-challenge/api-gateway/internal/adapters/http"
 	"github.com/luizdavid/movies-challenge/api-gateway/internal/config"
 	"github.com/luizdavid/movies-challenge/api-gateway/internal/logger"
+	"github.com/luizdavid/movies-challenge/api-gateway/internal/middleware"
 	"github.com/luizdavid/movies-challenge/api-gateway/internal/routes"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -48,7 +49,11 @@ func main() {
 	}
 
 	router := gin.New()
-	router.Use(gin.Recovery())
+	router.Use(
+		middleware.RequestID(),
+		middleware.Logger(appLogger),
+		gin.Recovery(),
+	)
 
 	routes.RegisterRoutes(router, movieHandler)
 
