@@ -11,10 +11,10 @@ import (
 
 	grpcadapter "github.com/luizdavid/movies-challenge/movie-service/internal/adapters/grpc"
 	mongoadapter "github.com/luizdavid/movies-challenge/movie-service/internal/adapters/repository/mongodb"
-	"github.com/luizdavid/movies-challenge/movie-service/internal/application"
 	"github.com/luizdavid/movies-challenge/movie-service/internal/config"
 	"github.com/luizdavid/movies-challenge/movie-service/internal/database"
 	"github.com/luizdavid/movies-challenge/movie-service/internal/logger"
+	"github.com/luizdavid/movies-challenge/movie-service/internal/usecases"
 	moviepb "github.com/luizdavid/movies-challenge/movie-service/proto"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -46,12 +46,12 @@ func main() {
 		Collection(cfg.MongoCollection)
 
 	movieRepository := mongoadapter.NewMovieRepository(collection)
-	movieService := application.NewMovieService(movieRepository)
-	movieGRPCServer := grpcadapter.NewMovieGRPCServer(movieService)
+	movieUseCases := usecases.NewMovieUseCases(movieRepository)
+	movieHandler := grpcadapter.NewMovieHandler(movieUseCases)
 
 	grpcServer := grpc.NewServer()
 
-	moviepb.RegisterMovieServiceServer(grpcServer, movieGRPCServer)
+	moviepb.RegisterMovieServiceServer(grpcServer, movieHandler)
 
 	address := fmt.Sprintf(":%s", cfg.GRPCPort)
 
