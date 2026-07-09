@@ -17,8 +17,11 @@ func NewMovieClient(conn *grpc.ClientConn) *MovieClient {
 	}
 }
 
-func (c *MovieClient) GetMovies(ctx context.Context) (*moviepb.GetMoviesResponse, error) {
-	return c.client.GetMovies(ctx, &moviepb.GetMoviesRequest{})
+func (c *MovieClient) GetMovies(ctx context.Context, page int64, limit int64) (*moviepb.GetMoviesResponse, error) {
+	return c.client.GetMovies(ctx, &moviepb.GetMoviesRequest{
+		Page:  page,
+		Limit: limit,
+	})
 }
 
 func (c *MovieClient) GetMovieByID(ctx context.Context, id int64) (*moviepb.GetMovieByIdResponse, error) {

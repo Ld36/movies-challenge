@@ -28,8 +28,21 @@ func NewMovieHandler(client *grpcclient.MovieClient) *MovieHandler {
 	}
 }
 
+// GetMovies godoc
+// @Summary Listar filmes
+// @Description Listar filmes com paginação
+// @Tags movies
+// @Produce json
+// @Param page query int false "Número da página"
+// @Param limit query int false "Itens por página"
+// @Success 200 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /movies [get]
 func (h *MovieHandler) GetMovies(c *gin.Context) {
-	response, err := h.client.GetMovies(c.Request.Context())
+	page := parseQueryInt(c, "page", 1)
+	limit := parseQueryInt(c, "limit", 20)
+
+	response, err := h.client.GetMovies(c.Request.Context(), page, limit)
 	if err != nil {
 		handleGRPCError(c, err)
 		return
@@ -37,9 +50,23 @@ func (h *MovieHandler) GetMovies(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"data": response.Movies,
+		"pagination": gin.H{
+			"page":  page,
+			"limit": limit,
+		},
 	})
 }
 
+// GetMovieByID godoc
+// @Summary Obter filme por ID
+// @Description Obter detalhes de um filme pelo ID
+// @Tags movies
+// @Produce json
+// @Param id path int true "ID do filme"
+// @Success 200 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /movies/{id} [get]
 func (h *MovieHandler) GetMovieByID(c *gin.Context) {
 	id, err := parseIDParam(c)
 	if err != nil {
@@ -60,6 +87,16 @@ func (h *MovieHandler) GetMovieByID(c *gin.Context) {
 	})
 }
 
+// CreateMovie godoc
+// @Summary Criar filme
+// @Description Criar um novo filme
+// @Tags movies
+// @Produce json
+// @Param movie body createMovieRequest true "Dados do filme"
+// @Success 201 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /movies [post]
 func (h *MovieHandler) CreateMovie(c *gin.Context) {
 	var request createMovieRequest
 
@@ -87,6 +124,16 @@ func (h *MovieHandler) CreateMovie(c *gin.Context) {
 	})
 }
 
+// DeleteMovie godoc
+// @Summary Excluir filme
+// @Description Excluir um filme pelo ID
+// @Tags movies
+// @Produce json
+// @Param id path int true "ID do filme"
+// @Success 200 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /movies/{id} [delete]
 func (h *MovieHandler) DeleteMovie(c *gin.Context) {
 	id, err := parseIDParam(c)
 	if err != nil {
@@ -141,6 +188,20 @@ func handleGRPCError(c *gin.Context, err error) {
 	c.JSON(statusCode, gin.H{
 		"error": message,
 	})
+}
+
+func parseQueryInt(c *gin.Context, key string, fallback int64) int64 {
+	value := c.Query(key)
+	if value == "" {
+		return fallback
+	}
+
+	parsed, err := strconv.ParseInt(value, 10, 64)
+	if err != nil || parsed <= 0 {
+		return fallback
+	}
+
+	return parsed
 }
 
 var _ = errors.New

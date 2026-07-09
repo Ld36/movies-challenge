@@ -83,6 +83,8 @@ func (x *Movie) GetYear() string {
 
 type GetMoviesRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	Page          int64                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
+	Limit         int64                  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -115,6 +117,20 @@ func (x *GetMoviesRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use GetMoviesRequest.ProtoReflect.Descriptor instead.
 func (*GetMoviesRequest) Descriptor() ([]byte, []int) {
 	return file_proto_movie_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *GetMoviesRequest) GetPage() int64 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *GetMoviesRequest) GetLimit() int64 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
 }
 
 type GetMoviesResponse struct {
@@ -449,8 +465,10 @@ const file_proto_movie_proto_rawDesc = "" +
 	"\x05Movie\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12\x12\n" +
-	"\x04year\x18\x03 \x01(\tR\x04year\"\x12\n" +
-	"\x10GetMoviesRequest\"9\n" +
+	"\x04year\x18\x03 \x01(\tR\x04year\"<\n" +
+	"\x10GetMoviesRequest\x12\x12\n" +
+	"\x04page\x18\x01 \x01(\x03R\x04page\x12\x14\n" +
+	"\x05limit\x18\x02 \x01(\x03R\x05limit\"9\n" +
 	"\x11GetMoviesResponse\x12$\n" +
 	"\x06movies\x18\x01 \x03(\v2\f.movie.MovieR\x06movies\"%\n" +
 	"\x13GetMovieByIdRequest\x12\x0e\n" +

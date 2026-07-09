@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
+	_ "github.com/luizdavid/movies-challenge/api-gateway/docs"
 	"github.com/luizdavid/movies-challenge/api-gateway/internal/adapters/grpcclient"
 	httpadapter "github.com/luizdavid/movies-challenge/api-gateway/internal/adapters/http"
 	"github.com/luizdavid/movies-challenge/api-gateway/internal/config"
@@ -14,6 +15,12 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
+
+// @title API Gateway de Filmes
+// @version 1.0
+// @description API Gateway para o microsserviço de Filmes utilizando HTTP, gRPC, Go e MongoDB.
+// @host localhost:8080
+// @BasePath /
 
 func main() {
 	cfg := config.Load()

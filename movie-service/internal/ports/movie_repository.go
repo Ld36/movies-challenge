@@ -7,7 +7,7 @@ import (
 )
 
 type MovieRepository interface {
-	FindAll(ctx context.Context) ([]domain.Movie, error)
+	FindAll(ctx context.Context, page int64, limit int64) ([]domain.Movie, error)
 	FindByID(ctx context.Context, id int64) (*domain.Movie, error)
 	Create(ctx context.Context, movie domain.Movie) (*domain.Movie, error)
 	Delete(ctx context.Context, id int64) error
