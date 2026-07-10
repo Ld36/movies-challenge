@@ -1,8 +1,14 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/luizdavid/movies-challenge/api-gateway/docs"
@@ -59,9 +65,38 @@ func main() {
 
 	address := fmt.Sprintf(":%s", cfg.HTTPPort)
 
-	appLogger.Info("api-gateway started", zap.String("address", address))
-
-	if err := router.Run(address); err != nil {
-		appLogger.Fatal("failed to start api-gateway", zap.Error(err))
+	server := &http.Server{
+		Addr:    address,
+		Handler: router,
 	}
+
+	go func() {
+		appLogger.Info("api-gateway started", zap.String("address", address))
+
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			appLogger.Fatal("failed to start api-gateway", zap.Error(err))
+		}
+	}()
+
+	waitForShutdown(server, appLogger)
+}
+
+func waitForShutdown(server *http.Server, appLogger *zap.Logger) {
+	quit := make(chan os.Signal, 1)
+
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+
+	<-quit
+
+	appLogger.Info("shutting down api-gateway...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := server.Shutdown(ctx); err != nil {
+		appLogger.Error("api-gateway forced to shutdown", zap.Error(err))
+		return
+	}
+
+	appLogger.Info("api-gateway stopped gracefully")
 }
