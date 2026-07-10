@@ -99,6 +99,7 @@ As operações de criação e remoção de filmes são processadas de forma ass�
 - Ports and Adapters (Hexagonal Architecture)
 - Event Driven Architecture
 - Rate Limiting
+
 # Estrutura do projeto
 
 ```
@@ -300,6 +301,52 @@ DELETE /movies/{id}
 
 ---
 
+## Exemplos de utilização via curl
+
+### Health Check
+
+```bash
+curl http://localhost:8080/health
+```
+
+---
+
+### Listar filmes
+
+```bash
+curl "http://localhost:8080/movies?page=1&limit=20"
+```
+
+---
+
+### Buscar filme por ID
+
+```bash
+curl http://localhost:8080/movies/10
+```
+
+---
+
+### Criar filme
+
+```bash
+curl -X POST http://localhost:8080/movies \
+-H "Content-Type: application/json" \
+-d '{
+  "id":999999,
+  "title":"Meu Filme",
+  "year":"2026"
+}'
+```
+
+---
+
+### Remover filme
+
+```bash
+curl -X DELETE http://localhost:8080/movies/999999
+```
+
 # Comunicação entre serviços
 
 A comunicação entre os microsserviços é realizada utilizando gRPC.
@@ -396,11 +443,12 @@ client_ip
 
 # Docker
 
-O projeto é composto por três containers:
+O projeto é composto pelos seguintes containers:
 
 - API Gateway
 - Movie Service
 - MongoDB
+- RabbitMQ
 
 Todos inicializados através do Docker Compose.
 
