@@ -71,9 +71,13 @@ func main() {
 		appLogger.Fatal("failed to declare RabbitMQ exchange", zap.Error(err))
 	}
 
+	movieRepository := mongoadapter.NewMovieRepository(collection)
 	movieEventPublisher := rabbitmqadapter.NewMovieEventPublisher(rabbitChannel)
 
-	movieRepository := mongoadapter.NewMovieRepository(collection)
+	movieEventConsumer := rabbitmqadapter.NewMovieEventConsumer(rabbitChannel, movieRepository, appLogger)
+	if err := movieEventConsumer.Start(ctx); err != nil {
+		appLogger.Fatal("failed to start movie event consumer", zap.Error(err))
+	}
 	movieUseCases := usecases.NewMovieUseCases(movieRepository, movieEventPublisher)
 	movieHandler := grpcadapter.NewMovieHandler(movieUseCases)
 
