@@ -9,11 +9,11 @@ type MovieUseCases struct {
 	DeleteMovie *DeleteMovieUseCase
 }
 
-func NewMovieUseCases(repository ports.MovieRepository) *MovieUseCases {
+func NewMovieUseCases(repository ports.MovieRepository, publisher ports.MovieEventPublisher) *MovieUseCases {
 	return &MovieUseCases{
 		ListMovies:  NewListMoviesUseCase(repository),
 		GetMovie:    NewGetMovieUseCase(repository),
-		CreateMovie: NewCreateMovieUseCase(repository),
-		DeleteMovie: NewDeleteMovieUseCase(repository),
+		CreateMovie: NewCreateMovieUseCase(repository, publisher),
+		DeleteMovie: NewDeleteMovieUseCase(publisher),
 	}
 }

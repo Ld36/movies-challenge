@@ -13,7 +13,9 @@ import (
 
 func TestCreateMovieUseCase_Execute_Success(t *testing.T) {
 	repository := new(mocks.MovieRepositoryMock)
-	useCase := NewCreateMovieUseCase(repository)
+	publisher := new(mocks.MovieEventPublisherMock)
+
+	useCase := NewCreateMovieUseCase(repository, publisher)
 
 	ctx := context.Background()
 
@@ -24,12 +26,16 @@ func TestCreateMovieUseCase_Execute_Success(t *testing.T) {
 	}
 
 	repository.
-		On("Create", mock.Anything, mock.MatchedBy(func(movie domain.Movie) bool {
+		On("FindByID", mock.Anything, expectedMovie.ID).
+		Return(nil, apperrors.ErrMovieNotFound)
+
+	publisher.
+		On("PublishMovieCreated", mock.Anything, mock.MatchedBy(func(movie domain.Movie) bool {
 			return movie.ID == expectedMovie.ID &&
 				movie.Title == expectedMovie.Title &&
 				movie.Year == expectedMovie.Year
 		})).
-		Return(expectedMovie, nil)
+		Return(nil)
 
 	result, err := useCase.Execute(ctx, 999, "Test Movie", "2026")
 
@@ -37,11 +43,14 @@ func TestCreateMovieUseCase_Execute_Success(t *testing.T) {
 	assert.Equal(t, expectedMovie, result)
 
 	repository.AssertExpectations(t)
+	publisher.AssertExpectations(t)
 }
 
 func TestCreateMovieUseCase_Execute_InvalidMovieData(t *testing.T) {
 	repository := new(mocks.MovieRepositoryMock)
-	useCase := NewCreateMovieUseCase(repository)
+	publisher := new(mocks.MovieEventPublisherMock)
+
+	useCase := NewCreateMovieUseCase(repository, publisher)
 
 	ctx := context.Background()
 
@@ -50,5 +59,6 @@ func TestCreateMovieUseCase_Execute_InvalidMovieData(t *testing.T) {
 	assert.ErrorIs(t, err, apperrors.ErrInvalidMovieData)
 	assert.Nil(t, result)
 
-	repository.AssertNotCalled(t, "Create")
+	repository.AssertNotCalled(t, "FindByID")
+	publisher.AssertNotCalled(t, "PublishMovieCreated")
 }
