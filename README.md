@@ -269,6 +269,24 @@ A geração dos arquivos é realizada através do Protocol Buffers.
 
 ---
 
+## Event Driven
+
+As operações de criação e remoção de filmes são processadas de forma assíncrona utilizando RabbitMQ.
+
+Fluxo:
+
+POST /movies ou DELETE /movies/{id}
+↓
+API Gateway
+↓
+Movie Service
+↓
+Publicação de evento no RabbitMQ
+↓
+Worker consumidor
+↓
+MongoDB
+
 # Banco de dados
 
 MongoDB
