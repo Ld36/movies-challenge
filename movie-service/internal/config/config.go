@@ -13,6 +13,7 @@ type Config struct {
 	MongoURI        string
 	MongoDatabase   string
 	MongoCollection string
+	RabbitMQURL     string
 }
 
 func Load() *Config {
@@ -25,6 +26,7 @@ func Load() *Config {
 		MongoURI:        getEnv("MONGO_URI", "mongodb://localhost:27017"),
 		MongoDatabase:   getEnv("MONGO_DATABASE", "movies_db"),
 		MongoCollection: getEnv("MONGO_COLLECTION", "movies"),
+		RabbitMQURL:     getEnv("RABBITMQ_URL", "amqp://guest:guest@localhost:5672/"),
 	}
 }
 
