@@ -29,8 +29,11 @@ services:
       MONGO_URI: mongodb://mongo:27017
       MONGO_DATABASE: movies_db
       MONGO_COLLECTION: movies
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
     depends_on:
       mongo:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
     networks:
       - movies-network
@@ -44,6 +47,21 @@ services:
       - mongo-data:/data/db
     healthcheck:
       test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - movies-network
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: movies-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5

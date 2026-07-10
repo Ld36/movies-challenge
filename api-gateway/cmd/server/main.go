@@ -57,6 +57,7 @@ func main() {
 	router := gin.New()
 	router.Use(
 		middleware.RequestID(),
+		middleware.RateLimit(10, 20),
 		middleware.Logger(appLogger),
 		gin.Recovery(),
 	)

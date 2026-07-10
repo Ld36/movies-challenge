@@ -7,13 +7,15 @@ import (
 )
 
 type DeleteMovieUseCase struct {
-	repository ports.MovieRepository
+	publisher ports.MovieEventPublisher
 }
 
-func NewDeleteMovieUseCase(repository ports.MovieRepository) *DeleteMovieUseCase {
-	return &DeleteMovieUseCase{repository: repository}
+func NewDeleteMovieUseCase(publisher ports.MovieEventPublisher) *DeleteMovieUseCase {
+	return &DeleteMovieUseCase{
+		publisher: publisher,
+	}
 }
 
 func (uc *DeleteMovieUseCase) Execute(ctx context.Context, id int64) error {
-	return uc.repository.Delete(ctx, id)
+	return uc.publisher.PublishMovieDeleted(ctx, id)
 }

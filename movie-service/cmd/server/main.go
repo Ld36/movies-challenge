@@ -10,6 +10,7 @@ import (
 	"syscall"
 
 	grpcadapter "github.com/luizdavid/movies-challenge/movie-service/internal/adapters/grpc"
+	rabbitmqadapter "github.com/luizdavid/movies-challenge/movie-service/internal/adapters/messaging/rabbitmq"
 	mongoadapter "github.com/luizdavid/movies-challenge/movie-service/internal/adapters/repository/mongodb"
 	"github.com/luizdavid/movies-challenge/movie-service/internal/bootstrap"
 	"github.com/luizdavid/movies-challenge/movie-service/internal/config"
@@ -54,8 +55,30 @@ func main() {
 		appLogger.Fatal("failed to seed movies", zap.Error(err))
 	}
 
+	rabbitConnection, err := rabbitmqadapter.NewConnection(cfg.RabbitMQURL)
+	if err != nil {
+		appLogger.Fatal("failed to connect to RabbitMQ", zap.Error(err))
+	}
+	defer rabbitConnection.Close()
+
+	rabbitChannel, err := rabbitmqadapter.NewChannel(rabbitConnection)
+	if err != nil {
+		appLogger.Fatal("failed to create RabbitMQ channel", zap.Error(err))
+	}
+	defer rabbitChannel.Close()
+
+	if err := rabbitmqadapter.DeclareMovieEventsExchange(rabbitChannel); err != nil {
+		appLogger.Fatal("failed to declare RabbitMQ exchange", zap.Error(err))
+	}
+
 	movieRepository := mongoadapter.NewMovieRepository(collection)
-	movieUseCases := usecases.NewMovieUseCases(movieRepository)
+	movieEventPublisher := rabbitmqadapter.NewMovieEventPublisher(rabbitChannel)
+
+	movieEventConsumer := rabbitmqadapter.NewMovieEventConsumer(rabbitChannel, movieRepository, appLogger)
+	if err := movieEventConsumer.Start(ctx); err != nil {
+		appLogger.Fatal("failed to start movie event consumer", zap.Error(err))
+	}
+	movieUseCases := usecases.NewMovieUseCases(movieRepository, movieEventPublisher)
 	movieHandler := grpcadapter.NewMovieHandler(movieUseCases)
 
 	grpcServer := grpc.NewServer()

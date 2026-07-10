@@ -10,50 +10,95 @@ Além dos requisitos obrigatórios do desafio, foram adicionadas alguns itens pa
 
 ---
 
-# Arquitetura
+## Arquitetura
+
+O projeto foi desenvolvido utilizando uma arquitetura baseada em microsserviços, separando as responsabilidades entre uma API Gateway e um serviço dedicado ao gerenciamento de filmes.
 
 ```
                     HTTP/REST
                          │
                          ▼
-                +------------------+
-                |   API Gateway    |
-                |      (Gin)       |
-                +------------------+
+                 +----------------+
+                 |   API Gateway  |
+                 |      Gin       |
+                 +----------------+
                          │
-                       gRPC
-                         │
+                         │ gRPC
                          ▼
-                +------------------+
-                |  Movie Service   |
-                | Business Rules   |
-                +------------------+
-                         │
-                         ▼
-                  +--------------+
-                  |   MongoDB    |
-                  +--------------+
+              +----------------------+
+              |    Movie Service     |
+              |   Clean Architecture |
+              +----------------------+
+                  │              │
+                  │              │
+             RabbitMQ        MongoDB
+          (Event Driven)      (Dados)
+                  │
+                  ▼
+          Worker Consumer
 ```
 
+### Fluxo das requisições
+
+**Consultas (GET)**
+
+```
+Cliente
+    │
+HTTP REST
+    │
+API Gateway
+    │
+gRPC
+    │
+Movie Service
+    │
+MongoDB
+```
+
+**Operações de escrita (POST e DELETE)**
+
+```
+Cliente
+    │
+HTTP REST
+    │
+API Gateway
+    │
+gRPC
+    │
+Movie Service
+    │
+Publicação de Evento
+    │
+RabbitMQ
+    │
+Worker Consumer
+    │
+MongoDB
+```
+
+As operações de criação e remoção de filmes são processadas de forma assíncrona utilizando RabbitMQ, demonstrando uma arquitetura orientada a eventos (Event Driven).
+
 ---
 
-# Tecnologias utilizadas
+## Tecnologias Utilizadas
 
-- Go
-- Gin
+- Go 1.24
+- Gin Framework
 - gRPC
-- Protocol Buffers
+- Protocol Buffers (protobuf)
 - MongoDB
+- RabbitMQ
 - Docker
 - Docker Compose
-- Swagger
-- Zap Logger
+- Swagger (OpenAPI)
 - Testify
-- UUID
-- Mongo Driver
-
----
-
+- Zap Logger
+- Clean Architecture
+- Ports and Adapters (Hexagonal Architecture)
+- Event Driven Architecture
+- Rate Limiting
 # Estrutura do projeto
 
 ```
@@ -268,6 +313,24 @@ proto/movie.proto
 A geração dos arquivos é realizada através do Protocol Buffers.
 
 ---
+
+## Event Driven
+
+As operações de criação e remoção de filmes são processadas de forma assíncrona utilizando RabbitMQ.
+
+Fluxo:
+
+POST /movies ou DELETE /movies/{id}
+↓
+API Gateway
+↓
+Movie Service
+↓
+Publicação de evento no RabbitMQ
+↓
+Worker consumidor
+↓
+MongoDB
 
 # Banco de dados
 
